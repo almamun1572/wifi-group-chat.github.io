@@ -99,30 +99,29 @@
     </div>
 
     <script>
-   const ws = new WebSocket('ws://192.168.0.109:8080');
+        const ws = new WebSocket('ws://192.168.0.109:8080'); // Update to your server's IP
 
-ws.onopen = () => {
-    console.log('Connected to the server');
-};
+        const chatMessages = document.getElementById('chatMessages');
+        const messageInput = document.getElementById('messageInput');
+        const sendMessageButton = document.getElementById('sendMessage');
 
-ws.onmessage = (event) => {
-    const chatBox = document.getElementById('chatBox');
-    chatBox.innerHTML += `<p>${event.data}</p>`;
-};
+        ws.onopen = () => {
+            console.log('Connected to the server');
+        };
 
-ws.onclose = () => {
-    console.log('Disconnected from the server');
-};
+        ws.onmessage = (event) => {
+            const messageData = JSON.parse(event.data);
+            displayMessage(messageData.message, messageData.sender === 'self' ? 'self' : 'other');
+        };
 
-ws.onerror = (error) => {
-    console.error('WebSocket error:', error);
-};
-
-function sendMessage() {
-    const input = document.getElementById('messageInput');
-    ws.send(input.value);
-    input.value = '';
-}
+        sendMessageButton.addEventListener('click', () => {
+            const message = messageInput.value.trim();
+            if (message) {
+                ws.send(JSON.stringify({ message, sender: 'self' }));
+                displayMessage(message, 'self');
+                messageInput.value = '';
+            }
+        });
 
         function displayMessage(message, type) {
             const messageElement = document.createElement('div');
